@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Stack;
 
 public class Board {
@@ -72,7 +73,6 @@ public class Board {
                         misplacedBlocks += Math.abs(xGoal-i) + Math.abs(yGoal-j);
                     }
                 }
-             
             }
         }
         return misplacedBlocks;
@@ -118,8 +118,24 @@ public class Board {
      * (non-Javadoc) Does this board equal y?
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object y) {
-        return false;
+    public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+        if (that == null) {
+            return false;
+        }
+        if (this.getClass() != that.getClass()) {
+            return false;
+        }
+        Board newThat = (Board) that;
+        if (this.dim != newThat.dim) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.boardBlocks, newThat.boardBlocks)) {
+            return false;
+        }
+        return true;
     }
     
     /*
@@ -134,11 +150,11 @@ public class Board {
         
         if (row > 0) {
             //swap with block below
-            queue.push(new Board(this.swap(this.copy(), row, col, row+1, col)));
+            queue.push(new Board(this.swap(this.copy(), row, col, row-1, col)));
         }
         if (row < dim-1) {
             //swap with block above
-            queue.push(new Board(this.swap(this.copy(), row, col, row-1, col)));
+            queue.push(new Board(this.swap(this.copy(), row, col, row+1, col)));
         }
         if (col > 0) {
             //swap with block to left
