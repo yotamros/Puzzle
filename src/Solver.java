@@ -88,11 +88,11 @@ public class Solver {
         }
     }
     
-    
     /*
      * Solve a slider puzzle (given below)
      */
     public static void main(String[] args) {
+        System.out.println();
 
          // Create initial board from file
          In in = new In(args[0]);
