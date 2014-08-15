@@ -1,9 +1,8 @@
 import java.util.Stack;
 
 public class Solver {
-
     Node goalBoard = null;
-
+    
     private class Node implements Comparable<Node> {
         private Board board;
         private int moves;
@@ -33,24 +32,27 @@ public class Solver {
      * Find a solution to the initial board (using the A* algorithm)
      */
     public Solver(Board initial) {
-        // Create a priority queue and insert the initial node
-        MinPQ<Node> pq = new MinPQ<Node>();
+        Board twin = initial.twin();
+        // Create a priority queue and insert the initial and twin nodes
+        MinPQ<Node> priority = new MinPQ<Node>();
         Node node = new Node(initial, null);
-        pq.insert(node);
+        Node twinNode = new Node(twin, null);
+        priority.insert(node);
+        priority.insert(twinNode);
 
          // Find the node with min priority. Check if this node is the goal board.
          // Create neighbors of this node, insert them to the queue and deque 
          // the node.
-        while (!(pq.min().board.isGoal())) {
-            Iterable<Board> neighborsQ = pq.min().board.neighbors();
-            Node least = pq.delMin();
+        while (!(priority.min().board.isGoal())) {
+            Iterable<Board> neighborsQ = priority.min().board.neighbors();
+            Node least = priority.delMin();
             for (Board board : neighborsQ) {
                 if (least.prev == null || !least.prev.board.equals(board)) {
-                    pq.insert(new Node(board, least));
+                    priority.insert(new Node(board, least));
                 }
             }
         }
-        goalBoard = pq.min();
+        goalBoard = priority.min();
     }
 
     /*

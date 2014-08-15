@@ -12,7 +12,6 @@ public class Board {
      * (where blocks[i][j] = block in row i, column j)
      */
     public Board(int[][] blocks) {
-        
         dim = blocks.length;
         boardBlocks = new int[dim][dim];
         for (int i = 0; i < dim; i++) {
@@ -91,7 +90,7 @@ public class Board {
     public Board twin() {
         int rowOfBlank = 0;
         int rowToEdit = 0;
-        int [][] twin = new int[dim][dim];
+        int[][] twin = new int[dim][dim];
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 twin[i][j] = boardBlocks[i][j];
@@ -110,7 +109,6 @@ public class Board {
         twin[rowToEdit][0] = blockB;
         twin[rowToEdit][1] = blockA;
         Board twinBoard = new Board(twin);
-        twinBoard.toString();
         return twinBoard;
     }
     
@@ -142,29 +140,28 @@ public class Board {
      * All neighboring boards
      */
     public Iterable<Board> neighbors() {
-        Stack<Board> queue = new Stack<Board>();
-        
-        int[] zero = this.findZero();
+        Stack<Board> neighborsQ = new Stack<Board>();
+        int[] zero = findZero();
         int row = zero[0];
         int col = zero[1];
         
         if (row > 0) {
-            //swap with block below
-            queue.push(new Board(this.swap(this.copy(), row, col, row-1, col)));
+            //swap with block above
+            neighborsQ.push(new Board(swap(copy(), row, col, row-1, col)));
         }
         if (row < dim-1) {
-            //swap with block above
-            queue.push(new Board(this.swap(this.copy(), row, col, row+1, col)));
+            //swap with block below
+            neighborsQ.push(new Board(swap(copy(), row, col, row+1, col)));
         }
         if (col > 0) {
             //swap with block to left
-            queue.push(new Board(this.swap(this.copy(), row, col, row, col-1)));
+            neighborsQ.push(new Board(swap(copy(), row, col, row, col-1)));
         }
         if (col < dim-1) {
             //swap with block to right
-            queue.push(new Board(this.swap(this.copy(), row, col, row, col+1)));
+            neighborsQ.push(new Board(swap(copy(), row, col, row, col+1)));
         }
-        return queue;
+        return neighborsQ;
     }
     
     private int[][] copy() {
