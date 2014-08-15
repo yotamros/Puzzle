@@ -88,6 +88,7 @@ public class Solver {
         }
     }
     
+    
     /*
      * Solve a slider puzzle (given below)
      */
