@@ -1,33 +1,27 @@
-import java.util.Arrays;
 import java.util.Stack;
 
 public class Board {
     
-    private int dim;
     int[][] boardBlocks;
     int[][] goalBoard;
+    int zeroI;
+    int zeroJ;
     
     /*
      * Construct a board from an N-by-N array of blocks
      * (where blocks[i][j] = block in row i, column j)
      */
     public Board(int[][] blocks) {
-        dim = blocks.length;
+       
+        int dim = blocks.length;
         boardBlocks = new int[dim][dim];
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
-                boardBlocks[i][j] = blocks[i][j];
-            }
-        }
-        
-        goalBoard = new int[dim][dim];
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                if (i == dim-1 && j == dim-1) {
-                    goalBoard[i][j] = 0;
-                } else {
-                    goalBoard[i][j] = (i*dim) + j+1;
+                if (blocks[i][j] == 0) {
+                    zeroI = i;
+                    zeroJ = j;
                 }
+                boardBlocks[i][j] = blocks[i][j];
             }
         }
     }
@@ -36,7 +30,7 @@ public class Board {
      * Board dimension N
      */
     public int dimension() {
-        return dim;
+        return boardBlocks.length;
     }
     
     /*
@@ -44,13 +38,10 @@ public class Board {
      */
     public int hamming() {
         int misplacedBlocks = 0;
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                if (boardBlocks[i][j] == 0) {
-                } else {
-                    if (boardBlocks[i][j] != goalBoard[i][j]) {
-                        misplacedBlocks++;
-                    } 
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (boardBlocks[i][j] != 0 && boardBlocks[i][j] != i*dimension()+j+1) {
+                    misplacedBlocks++;
                 }
             }
         }
@@ -62,15 +53,12 @@ public class Board {
      */
     public int manhattan() {
         int misplacedBlocks = 0;
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                if (boardBlocks[i][j] == 0) {
-                } else {
-                    if (boardBlocks[i][j] != goalBoard[i][j]) {
-                        int xGoal = boardBlocks[i][j]/dim;
-                        int yGoal = boardBlocks[i][j] - (dim*xGoal) -1;
-                        misplacedBlocks += Math.abs(xGoal-i) + Math.abs(yGoal-j);
-                    }
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (boardBlocks[i][j] != 0 && boardBlocks[i][j] != i*dimension()+j+1) {
+                    int xGoal = boardBlocks[i][j]/dimension();
+                    int yGoal = boardBlocks[i][j] - (dimension()*xGoal) -1;
+                    misplacedBlocks += Math.abs(xGoal-i) + Math.abs(yGoal-j);
                 }
             }
         }
@@ -81,28 +69,26 @@ public class Board {
      * Is this board the goal board?
      */
     public boolean isGoal() {
-        return hamming() == 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (boardBlocks[i][j] != 0 && boardBlocks[i][j] != i*dimension()+j+1) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     /*
      * A board obtained by exchanging two adjacent blocks in the same row
      */
     public Board twin() {
-        int rowOfBlank = 0;
         int rowToEdit = 0;
-        int[][] twin = new int[dim][dim];
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                twin[i][j] = boardBlocks[i][j];
-                if(boardBlocks[i][j] == 0) {
-                    rowOfBlank = i;
-                }
-            }
-        }
-        if (rowOfBlank > 0) {
-            rowToEdit = rowOfBlank -1;
+        int[][] twin = copy();
+        if (zeroI > 0) {
+            rowToEdit = zeroI -1;
         } else {
-            rowToEdit = rowOfBlank +1;
+            rowToEdit = zeroI +1;
         }
         int blockA = twin[rowToEdit][0];
         int blockB = twin[rowToEdit][1];
@@ -120,18 +106,19 @@ public class Board {
         if (this == that) {
             return true;
         }
-        if (that == null) {
+        if (!(that instanceof Board)) {
             return false;
         }
-        if (this.getClass() != that.getClass()) {
+        Board newThat = (Board)that;
+        if (this.dimension() != newThat.dimension()) {
             return false;
         }
-        Board newThat = (Board) that;
-        if (this.dim != newThat.dim) {
-            return false;
-        }
-        if (!Arrays.deepEquals(this.boardBlocks, newThat.boardBlocks)) {
-            return false;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (this.boardBlocks[i][j] != newThat.boardBlocks[i][j]) {
+                    return false;
+                }
+            }
         }
         return true;
     }
@@ -141,31 +128,28 @@ public class Board {
      */
     public Iterable<Board> neighbors() {
         Stack<Board> neighborsQ = new Stack<Board>();
-        int[] zero = findZero();
-        int row = zero[0];
-        int col = zero[1];
         
-        if (row > 0) {
+        if (zeroI > 0) {
             //swap with block above
-            neighborsQ.push(new Board(swap(copy(), row, col, row-1, col)));
+            neighborsQ.push(new Board(swap(copy(), zeroI, zeroJ, zeroI-1, zeroJ)));
         }
-        if (row < dim-1) {
+        if (zeroI < dimension()-1) {
             //swap with block below
-            neighborsQ.push(new Board(swap(copy(), row, col, row+1, col)));
+            neighborsQ.push(new Board(swap(copy(), zeroI, zeroJ, zeroI+1, zeroJ)));
         }
-        if (col > 0) {
+        if (zeroJ > 0) {
             //swap with block to left
-            neighborsQ.push(new Board(swap(copy(), row, col, row, col-1)));
+            neighborsQ.push(new Board(swap(copy(), zeroI, zeroJ, zeroI, zeroJ-1)));
         }
-        if (col < dim-1) {
+        if (zeroJ < dimension()-1) {
             //swap with block to right
-            neighborsQ.push(new Board(swap(copy(), row, col, row, col+1)));
+            neighborsQ.push(new Board(swap(copy(), zeroI, zeroJ, zeroI, zeroJ+1)));
         }
         return neighborsQ;
     }
     
     private int[][] copy() {
-        int[][] blocksCopy = new int[dim][dim];
+        int[][] blocksCopy = new int[dimension()][dimension()];
         for (int i = 0; i < blocksCopy.length; i++) {
             for (int j = 0; j < blocksCopy.length; j++) {
                 blocksCopy[i][j] = boardBlocks[i][j];
@@ -181,24 +165,6 @@ public class Board {
         return blocksCopy;
     }
     
-    
-    /*
-     * Find the location of zero.  Return an array with two values for i and j.
-     */
-    private int[] findZero() {
-        int[] zeroLocation = {-1, -1};
-        for (int i = 0; i < boardBlocks.length; i++) {
-            for (int j = 0; j < boardBlocks.length; j++) {
-                if(boardBlocks[i][j] == 0) {
-                    zeroLocation[0] = i;
-                    zeroLocation[1] = j;
-                    return zeroLocation;
-                }
-            }
-        }
-        return zeroLocation;
-    }
-    
     /*
      * (non-Javadoc) String representation of the board 
      * (in the output format specified below)
@@ -206,7 +172,7 @@ public class Board {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(dim + "\n");
+        sb.append(dimension() + "\n");
         for (int i = 0; i < boardBlocks.length; i++) {
             for (int j = 0; j < boardBlocks.length; j++) {
                     sb.append(String.format("%4s", boardBlocks[i][j]));
