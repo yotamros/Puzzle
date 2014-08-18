@@ -12,7 +12,6 @@ public class Board {
      * (where blocks[i][j] = block in row i, column j)
      */
     public Board(int[][] blocks) {
-       
         int dim = blocks.length;
         boardBlocks = new int[dim][dim];
         for (int i = 0; i < dim; i++) {
@@ -173,8 +172,8 @@ public class Board {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(dimension() + "\n");
-        for (int i = 0; i < boardBlocks.length; i++) {
-            for (int j = 0; j < boardBlocks.length; j++) {
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
                     sb.append(String.format("%4s", boardBlocks[i][j]));
             }
             sb.append("\n");
