@@ -1,7 +1,6 @@
 import java.util.Stack;
 
 public class Board {
-    
     int[][] boardBlocks;
     int[][] goalBoard;
     int zeroI;
